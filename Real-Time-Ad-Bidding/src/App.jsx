@@ -30,7 +30,7 @@ export default function App() {
   }, []);
 
   return (
-    <div className="flex h-screen bg-gradient-to-br from-indigo-900 via-purple-900 to-black font-orbitron text-white">
+    <div className="flex h-screen bg-gradient-to-br from-[#0f0f0f] via-[#1a1a1a] to-[#111827] text-white font-sans">
       <Sidebar
         isSimulated={isSimulated}
         setIsSimulated={setIsSimulated}
@@ -38,10 +38,8 @@ export default function App() {
         setNFactor={setNFactor}
         onFileUpload={handleFileUpload}
       />
-      
-  
 
-      <div className="flex flex-col flex-1 shadow-xl">
+      <div className="flex flex-col flex-1 overflow-hidden">
         <Dashboard />
         <ConsoleLog logs={logs} />
       </div>

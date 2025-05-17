@@ -4,7 +4,7 @@ export default {
   theme: {
     extend: {
       fontFamily: {
-        orbitron: ["Orbitron", "sans-serif"],
+        sans:  ['"DM Sans"', 'sans-serif'],
       },
     },
   },
