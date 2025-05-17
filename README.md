@@ -23,8 +23,8 @@ Tech Stack
 3. Model Integration: Python-based machine learning model (communicating via API)
 
 How to Run
-npm install
-npm run dev
+ npm install
+ npm run dev
 
 
 
