@@ -1,4 +1,11 @@
-export default function Sidebar({ isSimulated, setIsSimulated, nFactor, setNFactor, onFileUpload }) {
+export default function Sidebar({
+  isSimulated,
+  setIsSimulated,
+  nFactor,
+  setNFactor,
+  onFileUpload,
+  onRunSimulation, // 🔹 NEW
+}) {
   return (
     <aside className="w-64 bg-gradient-to-b from-purple-900 via-indigo-900 to-black text-white p-8 flex flex-col gap-8 min-h-screen shadow-2xl">
       <h2 className="text-2xl font-extrabold tracking-wide mb-6 select-none">Control Panel</h2>
@@ -39,6 +46,7 @@ export default function Sidebar({ isSimulated, setIsSimulated, nFactor, setNFact
       </div>
 
       <button
+        onClick={onRunSimulation} // NEW: manual trigger
         className="mt-auto px-6 py-3 bg-indigo-600 rounded-lg font-semibold hover:bg-indigo-500 shadow-lg hover:shadow-indigo-400 transition focus:outline-none focus:ring-4 focus:ring-indigo-400"
       >
         Run
@@ -46,4 +54,5 @@ export default function Sidebar({ isSimulated, setIsSimulated, nFactor, setNFact
     </aside>
   );
 }
+
 

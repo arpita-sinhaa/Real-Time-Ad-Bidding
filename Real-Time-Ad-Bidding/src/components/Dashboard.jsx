@@ -11,13 +11,13 @@ import {
   Cell,
 } from 'recharts';
 
-export default function Dashboard() {
-  const lineData = [
-    { time: '12:00', ctr: 0.15, cvr: 0.05 },
-    { time: '12:01', ctr: 0.18, cvr: 0.07 },
-    { time: '12:02', ctr: 0.22, cvr: 0.09 },
-    { time: '12:03', ctr: 0.25, cvr: 0.10 },
-  ];
+export default function Dashboard({ predictionData = [] }) {
+  const recentData = predictionData.slice(-10).map((item, index) => ({
+    time: item.time || `T+${index}`,
+    ctr: item.ctr_pred,
+    cvr: item.cvr_pred,
+    result: item.result,
+  }));
 
   const pieData = [
     { name: 'Used', value: 62 },
@@ -34,7 +34,7 @@ export default function Dashboard() {
         {/* CTR/CVR Line Chart */}
         <section className="bg-gradient-to-tr from-indigo-900 to-purple-900 rounded-2xl p-6 shadow-2xl">
           <h2 className="text-2xl font-semibold mb-6 text-cyan-300 select-none">CTR/CVR Prediction</h2>
-          <LineChart width={460} height={270} data={lineData}>
+          <LineChart width={460} height={270} data={recentData.length > 0 ? recentData : null}>
             <CartesianGrid stroke="#555" strokeDasharray="4 4" />
             <XAxis dataKey="time" stroke="#a5b4fc" />
             <YAxis stroke="#a5b4fc" />
@@ -83,13 +83,46 @@ export default function Dashboard() {
           <p className="text-3xl font-bold text-cyan-400 mt-4 select-none">62% Used</p>
         </section>
 
-        {/* Bids Table (placeholder) */}
-        {/* <section className="bg-gray-800 rounded-2xl p-6 shadow-inner col-span-2 text-gray-300 text-lg font-mono select-none">
-          Bids Table Here
-        </section> */}
-        <div className="bg-gray-850 rounded-xl p-6 shadow-md col-span-2"> <h2 className="text-xl font-semibold text-white mb-4">Bid Results</h2> <table className="w-full text-sm text-left text-gray-300"> <thead className="text-xs uppercase tracking-widest text-gray-400 border-b border-gray-700"> <tr> <th className="px-4 py-2">Time</th> <th className="px-4 py-2">CTR</th> <th className="px-4 py-2">CVR</th> <th className="px-4 py-2">Result</th> </tr> </thead> <tbody> <tr className="hover:bg-gray-800/50"> <td className="px-4 py-2">12:00</td> <td className="px-4 py-2">0.15</td> <td className="px-4 py-2">0.05</td> <td className="px-4 py-2 text-green-400">Won</td> </tr> <tr className="hover:bg-gray-800/50"> <td className="px-4 py-2">12:01</td> <td className="px-4 py-2">0.18</td> <td className="px-4 py-2">0.07</td> <td className="px-4 py-2 text-red-400">Lost</td> </tr> </tbody> </table> </div>
+        {/* Bid Results Table */}
+        <section className="bg-gray-850 rounded-xl p-6 shadow-md col-span-2">
+          <h2 className="text-xl font-semibold text-white mb-4">Bid Results</h2>
+          <table className="w-full text-sm text-left text-gray-300">
+            <thead className="text-xs uppercase tracking-widest text-gray-400 border-b border-gray-700">
+              <tr>
+                <th className="px-4 py-2">Time</th>
+                <th className="px-4 py-2">CTR</th>
+                <th className="px-4 py-2">CVR</th>
+                <th className="px-4 py-2">Result</th>
+              </tr>
+            </thead>
+            <tbody>
+              {recentData.map((row, i) => (
+                <tr key={i} className="hover:bg-gray-800/50">
+                  <td className="px-4 py-2">{row.time}</td>
+                  <td className="px-4 py-2">{row.ctr}</td>
+                  <td className="px-4 py-2">{row.cvr}</td>
+                  <td
+                    className={`px-4 py-2 font-semibold ${
+                      row.result === 'Won' ? 'text-green-400' : 'text-red-400'
+                    }`}
+                  >
+                    {row.result}
+                  </td>
+                </tr>
+              ))}
+              {recentData.length === 0 && (
+                <tr>
+                  <td colSpan="4" className="text-center py-4 text-gray-500 italic">
+                    No predictions yet
+                  </td>
+                </tr>
+              )}
+            </tbody>
+          </table>
+        </section>
       </div>
     </main>
   );
 }
+
 
