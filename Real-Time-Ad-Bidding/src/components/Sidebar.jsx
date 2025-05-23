@@ -14,7 +14,7 @@ export default function Sidebar({
         <span className="block mb-2 font-semibold text-cyan-300">Upload Data</span>
         <input
           type="file"
-          accept=".csv,.json"
+          accept=".csv,.json,.txt"
           onChange={onFileUpload}
           className="block w-full text-gray-300 bg-gray-800 rounded-lg p-2 cursor-pointer border border-transparent hover:border-cyan-400 focus:outline-none focus:ring-2 focus:ring-cyan-400 transition"
         />

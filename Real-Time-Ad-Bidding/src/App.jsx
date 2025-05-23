@@ -1,96 +1,119 @@
-import { useState, useEffect } from "react";
-import Sidebar from "./components/Sidebar";
-import Dashboard from "./components/Dashboard";
-import ConsoleLog from "./components/ConsoleLog";
+'use client';
+
+import { useState } from 'react';
+import Sidebar from './components/Sidebar';
+import Dashboard from './components/Dashboard';
 
 export default function App() {
+  const [predictionData, setPredictionData] = useState([]);
   const [isSimulated, setIsSimulated] = useState(false);
-  const [nFactor, setNFactor] = useState(10);
-  const [logs, setLogs] = useState([]);
-  const [predictions, setPredictions] = useState([]);
+  const [nFactor, setNFactor] = useState(5);
 
-  // 🔹 Handle file upload
-  const handleFileUpload = async (e) => {
+  const onFileUpload = async (e) => {
     const file = e.target.files[0];
     if (!file) return;
 
     const formData = new FormData();
-    formData.append("file", file);
+    formData.append('file', file);
 
     try {
-      const response = await fetch("http://localhost:5000/api/upload", {
-        method: "POST",
+      const res = await fetch('/api/upload', {
+        method: 'POST',
         body: formData,
       });
 
-      const data = await response.json();
-      setLogs((prev) => [
-        ...prev,
-        `[UPLOAD] ${file.name} uploaded. Backend says: ${data.message || "Success"}`
-      ]);
-    } catch (error) {
-      setLogs((prev) => [...prev, `[UPLOAD] Failed: ${error.message}`]);
+      if (!res.ok) {
+        console.error('Upload failed');
+        return;
+      }
+
+      // Optionally: auto-trigger prediction after upload
+      await runPrediction();
+    } catch (err) {
+      console.error('Upload error:', err);
     }
   };
 
-  // 🔹 Trigger prediction API
-  const sendToBackend = async () => {
-    const input = {
-      n_factor: nFactor,
-      row_data: {
-        ctr: parseFloat((Math.random() * 0.3).toFixed(2)),
-        cvr: parseFloat((Math.random() * 0.1).toFixed(2)),
+  // const runPrediction = async () => {
+  //   try {
+  //     const predictRes = await fetch('/api/predict', {
+  //       method: 'POST',
+  //       headers: { 'Content-Type': 'application/json' },
+  //       body: JSON.stringify({ n_factor: nFactor }),
+  //     });
+
+  //     if (!predictRes.ok) {
+  //       console.error('Prediction failed');
+  //       return;
+  //     }
+
+  //     // Fetch prediction results
+  //     const outputRes = await fetch('/api/output');
+  //     const outputText = await outputRes.text();
+
+  //     // Parse text output (assuming it's line-separated JSON or tab-separated)
+  //     const lines = outputText.trim().split('\n');
+  //     const parsedData = lines.map((line, index) => {
+  //       const parts = line.split('\t');
+  //       return {
+  //         time: `T+${index}`,
+  //         ctr_pred: parseFloat(parts[0]),
+  //         cvr_pred: parseFloat(parts[1]),
+  //         result: parts[2],
+  //       };
+  //     });
+
+  //     setPredictionData(parsedData);
+  //   } catch (err) {
+  //     console.error('Prediction or output fetch error:', err);
+  //   }
+  // };
+
+  const runPrediction = async () => {
+  try {
+    // Provide sample row_data to send to backend predict endpoint
+    const sampleRowData = { ctr: 0.5, cvr: 0.3 }; 
+
+    const predictRes = await fetch('/api/predict', {
+      method: 'POST',
+      headers: { 'Content-Type': 'application/json' },
+      body: JSON.stringify({ n_factor: nFactor, row_data: sampleRowData }),
+    });
+
+    if (!predictRes.ok) {
+      console.error('Prediction failed');
+      return;
+    }
+
+    const prediction = await predictRes.json();
+
+    // Append new prediction to existing data for showing on Dashboard
+    setPredictionData((prev) => [
+      ...prev,
+      {
+        time: `T+${prev.length}`,
+        ctr_pred: prediction.ctr_pred,
+        cvr_pred: prediction.cvr_pred,
+        result: prediction.result,
       },
-    };
+    ]);
+  } catch (err) {
+    console.error('Prediction error:', err);
+  }
+};
 
-    try {
-      const response = await fetch("http://localhost:5000/api/predict", {
-        method: "POST",
-        headers: { "Content-Type": "application/json" },
-        body: JSON.stringify(input),
-      });
-
-      const result = await response.json();
-      setLogs((prev) => [
-        ...prev.slice(-29),
-        `[MODEL] CTR: ${result.ctr_pred}, CVR: ${result.cvr_pred} → ${result.result}`
-      ]);
-      setPredictions((prev) => [...prev, { ...result, time: new Date().toLocaleTimeString() }]);
-    } catch (error) {
-      setLogs((prev) => [...prev, `[MODEL] Error: ${error.message}`]);
-    }
-  };
-
-  // 🔹 Periodic simulation
-  useEffect(() => {
-    if (!isSimulated) return;
-
-    const interval = setInterval(() => {
-      sendToBackend();
-    }, 2000);
-
-    return () => clearInterval(interval);
-  }, [isSimulated, nFactor]);
 
   return (
-    <div className="flex h-screen bg-gradient-to-br from-[#0f0f0f] via-[#1a1a1a] to-[#111827] text-white font-sans">
+    <div className="flex">
       <Sidebar
         isSimulated={isSimulated}
         setIsSimulated={setIsSimulated}
         nFactor={nFactor}
         setNFactor={setNFactor}
-        onFileUpload={handleFileUpload}
-        onRunSimulation={sendToBackend}
+        onFileUpload={onFileUpload}
+        onRunSimulation={runPrediction}
       />
-
-      <div className="flex flex-col flex-1 overflow-hidden">
-        <Dashboard predictionData={predictions} />
-        <ConsoleLog logs={logs} />
-      </div>
+      <Dashboard predictionData={predictionData} />
     </div>
   );
 }
-
-
-
-

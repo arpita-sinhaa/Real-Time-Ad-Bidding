@@ -12,12 +12,22 @@ import {
 } from 'recharts';
 
 export default function Dashboard({ predictionData = [] }) {
-  const recentData = predictionData.slice(-10).map((item, index) => ({
-    time: item.time || `T+${index}`,
-    ctr: item.ctr_pred,
-    cvr: item.cvr_pred,
-    result: item.result,
-  }));
+  const recentData = predictionData
+    .filter(
+      (item) =>
+        item &&
+        typeof item === 'object' &&
+        'ctr_pred' in item &&
+        'cvr_pred' in item &&
+        'result' in item
+    )
+    .slice(-10)
+    .map((item, index) => ({
+      time: item.time || `T+${index}`,
+      ctr: item.ctr_pred,
+      cvr: item.cvr_pred,
+      result: item.result,
+    }));
 
   const pieData = [
     { name: 'Used', value: 62 },
